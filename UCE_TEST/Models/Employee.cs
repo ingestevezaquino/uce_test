@@ -16,6 +16,6 @@ namespace UCE_TEST.Models
         public string CivilStatus { get; set; } = null!;
         public byte[]? Photo { get; set; }
 
-        public virtual Direction? Direction { get; set; }
+        public virtual Address? Address { get; set; }
     }
 }

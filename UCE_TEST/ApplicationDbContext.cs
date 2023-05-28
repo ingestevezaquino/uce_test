@@ -8,17 +8,32 @@ namespace UCE_TEST
 {
     public partial class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options) {}
+        public ApplicationDbContext()
+        {
+        }
 
-        public virtual DbSet<Direction> Directions { get; set; } = null!;
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        public virtual DbSet<Address> Addresses { get; set; } = null!;
         public virtual DbSet<Employee> Employees { get; set; } = null!;
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=localhost,1433;Database=UCE_TEST;User=sa;Password=strongPassword@");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Direction>(entity =>
+            modelBuilder.Entity<Address>(entity =>
             {
-                entity.HasIndex(e => e.EmployeeId, "UQ_DIRECTIONS_EMPLOYEEID")
+                entity.HasIndex(e => e.EmployeeId, "UQ_ADDRESSES_EMPLOYEEID")
                     .IsUnique();
 
                 entity.Property(e => e.Country)
@@ -42,16 +57,20 @@ namespace UCE_TEST
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.Employee)
-                    .WithOne(p => p.Direction)
-                    .HasForeignKey<Direction>(d => d.EmployeeId)
-                    .HasConstraintName("FK_DIRECTIONS_EMPLOYEEID");
+                    .WithOne(p => p.Address)
+                    .HasForeignKey<Address>(d => d.EmployeeId)
+                    .HasConstraintName("FK_ADDRESSES_EMPLOYEEID");
             });
 
             modelBuilder.Entity<Employee>(entity =>
             {
+                entity.Property(e => e.BirthDay).HasColumnType("date");
+
                 entity.Property(e => e.CivilStatus)
                     .HasMaxLength(25)
                     .IsUnicode(false);
+
+                entity.Property(e => e.DateOfHire).HasColumnType("date");
 
                 entity.Property(e => e.Email)
                     .HasMaxLength(25)

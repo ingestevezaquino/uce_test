@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UCE_TEST.Models
 {
-    public partial class Direction
+    public partial class Address
     {
         public int Id { get; set; }
         public string Street { get; set; } = null!;

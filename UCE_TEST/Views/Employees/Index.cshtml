@@ -1,0 +1,96 @@
+@model IEnumerable<UCE_TEST.Models.Employee>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Photo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Position)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BirthDay)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateOfHire)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CivilStatus)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @{
+                    string employeePhoto = null;
+                    if (item.Photo is not null)
+                    {
+                        string imgBase64Data = Convert.ToBase64String(item.Photo);
+                        employeePhoto = string.Format("data:image/png;base64,{0}", imgBase64Data);
+                    }
+                }
+                <img src="@employeePhoto" class="img-fluid">
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Position)
+            </td>
+            <td>
+                @{ var birthday = item.BirthDay.ToString("dd/MM/yyyy"); }
+                @Html.DisplayFor(modelItem => birthday)
+            </td>
+            <td>
+                @{ var dateOfHire = item.BirthDay.ToString("dd/MM/yyyy"); }
+                @Html.DisplayFor(modelItem => dateOfHire)
+            </td>
+            <td>
+                @{
+                    var employeePhone = $"{item.Phone[0..3]}-{item.Phone[3..6]}-{item.Phone[6..]}";
+                }
+                @Html.DisplayFor(modelItem => employeePhone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CivilStatus)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
