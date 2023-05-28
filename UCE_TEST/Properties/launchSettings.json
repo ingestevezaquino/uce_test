@@ -1,0 +1,30 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:60283",
+      "sslPort": 44382
+    }
+  },
+  "profiles": {
+    "UCE_TEST": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7132;http://localhost:5130",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "UCE_TEST_DB_CONNECTION": "Server=localhost,1433;Database=UCE_TEST;User=sa;Password=strongPassword@"
+      },
+      "dotnetRunMessages": true
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "UCE_TEST_DB_CONNECTION": "Server=localhost,1433;Database=UCE_TEST;User=sa;Password=strongPassword@"
+      }
+    }
+  }
+}
