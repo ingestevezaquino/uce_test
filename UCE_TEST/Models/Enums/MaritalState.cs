@@ -1,9 +1,8 @@
 ﻿using System;
 namespace UCE_TEST.Models.Enums
 {
-	public enum CivilState
+	public enum MaritalState
 	{
 		Soltero, Casado, Divorciado
 	}
 }
-

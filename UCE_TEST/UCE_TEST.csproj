@@ -22,8 +22,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Models\Enums\" />
+    <None Remove="Models\DTOs\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Enums\" />
+    <Folder Include="Models\DTOs\" />
   </ItemGroup>
 </Project>

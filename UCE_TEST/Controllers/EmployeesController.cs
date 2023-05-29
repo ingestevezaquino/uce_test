@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
 using UCE_TEST;
+using UCE_TEST.Models.DTOs;
 using UCE_TEST.Models;
+using Newtonsoft.Json;
 
 namespace UCE_TEST.Controllers
 {
@@ -46,9 +51,18 @@ namespace UCE_TEST.Controllers
         }
 
         // GET: Employees/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewBag.CivilStatus = new SelectList(Enum.GetValues<Models.Enums.CivilState>());
+            using HttpClient client = new();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+
+            var response = await client.GetStringAsync("http://provinciasrd.raydelto.org/provincias");
+            ProvinceResponse provinces = JsonConvert.DeserializeObject<ProvinceResponse>(response);
+
+            ViewBag.Provinces = new SelectList(provinces.Data.Select(x => x.Nombre));
+            ViewBag.MaritalStatus = new SelectList(Enum.GetValues<Models.Enums.MaritalState>());
             return View();
         }
 
@@ -57,18 +71,16 @@ namespace UCE_TEST.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,LastName,Position,BirthDay,DateOfHire,Phone,Email,CivilStatus,Address")] Employee employee, IFormFile photo)
+        public async Task<IActionResult> Create([Bind("Id,Name,LastName,Position,BirthDay,DateOfHire,Phone,Email,MaritalStatus,Address")] Employee employee, IFormFile photo)
         {
             if (employee.Address is not null && ModelState["Address.Employee"].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
                 ModelState["Address.Employee"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
 
             try
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    photo.OpenReadStream().CopyTo(memoryStream);
-                    employee.Photo = memoryStream.ToArray();
-                }
+                using var memoryStream = new MemoryStream();
+                photo.OpenReadStream().CopyTo(memoryStream);
+                employee.Photo = memoryStream.ToArray();
             }
             catch
             {
@@ -105,7 +117,7 @@ namespace UCE_TEST.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,LastName,Position,BirthDay,DateOfHire,Phone,Email,CivilStatus,Photo")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,LastName,Position,BirthDay,DateOfHire,Phone,Email,MaritalStatus,Photo")] Employee employee)
         {
             if (id != employee.Id)
             {

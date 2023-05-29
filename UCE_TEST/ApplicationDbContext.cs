@@ -19,6 +19,7 @@ namespace UCE_TEST
 
         public virtual DbSet<Address> Addresses { get; set; } = null!;
         public virtual DbSet<Employee> Employees { get; set; } = null!;
+        public virtual DbSet<Log> Logs { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -40,11 +41,12 @@ namespace UCE_TEST
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
+
                 entity.Property(e => e.PostalCode)
                     .HasMaxLength(6)
                     .IsUnicode(false);
 
-                entity.Property(e => e.State)
+                entity.Property(e => e.Province)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
@@ -66,10 +68,6 @@ namespace UCE_TEST
             {
                 entity.Property(e => e.BirthDay).HasColumnType("date");
 
-                entity.Property(e => e.CivilStatus)
-                    .HasMaxLength(25)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.DateOfHire).HasColumnType("date");
 
                 entity.Property(e => e.Email)
@@ -78,6 +76,10 @@ namespace UCE_TEST
 
                 entity.Property(e => e.LastName)
                     .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.MaritalStatus)
+                    .HasMaxLength(25)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Name)
@@ -93,6 +95,18 @@ namespace UCE_TEST
                 entity.Property(e => e.Position)
                     .HasMaxLength(30)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Log>(entity =>
+            {
+                entity.Property(e => e.CreatedBy)
+                    .HasMaxLength(25)
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("(user_name())");
+
+                entity.Property(e => e.Description).IsUnicode(false);
+
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
             });
 
             OnModelCreatingPartial(modelBuilder);
