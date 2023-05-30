@@ -265,10 +265,29 @@ namespace UCE_TEST.Controllers
             if (employee is null)
                 return NotFound($"There is not an employee that holds the id: {id}");
 
+            var log = new Log()
+            {
+                Description = $"La información de contacto del empleado con el Id: '{id}', " +
+                $"fue modificada de la siguiente manera: ",
+                UpdatedAt = DateTime.Now
+            };
+
+            log.Description += !String.IsNullOrEmpty(phone) && !phone.Equals(employee.Phone) ? $" ---> [Telefono Anterior] = {employee.Phone} & " +
+                $"[Telefono Actual] = {phone} |" : "";
+
+            log.Description += !String.IsNullOrEmpty(email) && !email.Equals(employee.Email) ? $" ---> [Correo Anterior] = {employee.Email} & " +
+                $"[Correo Actual] = {email} |" : "";
+
+            if (!log.Description.EndsWith("|"))
+            {
+                return Ok();
+            }
+
             employee.Phone = !String.IsNullOrEmpty(phone) ? phone : employee.Phone;
             employee.Email = !String.IsNullOrEmpty(email) ? email : employee.Email;
 
             _context.Employees.Update(employee);
+            await _context.Logs.AddAsync(log);
             await _context.SaveChangesAsync();
 
             return Ok();
