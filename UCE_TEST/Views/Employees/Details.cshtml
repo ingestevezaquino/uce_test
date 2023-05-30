@@ -38,6 +38,13 @@
             @Html.DisplayFor(model => model.Position)
         </dd>
         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsActive)
+        </dt>
+        <dd class="col-sm-10">
+            @{ var state = Model.IsActive is true ? "Activo" : "Desvinculado"; }
+            @Html.DisplayFor(model => state)
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.BirthDay)
         </dt>
         <dd class="col-sm-10">

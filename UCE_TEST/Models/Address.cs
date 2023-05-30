@@ -16,6 +16,8 @@ namespace UCE_TEST.Models
         public string Zone { get; set; } = null!;
         [Display(Name = "Codigo Postal")]
         [Required(ErrorMessage = "El campo 'Codigo Postal' es requerido.")]
+        [MaxLength(10, ErrorMessage = "El campo 'Codigo Postal' admite un máximo de 6 numeros.")]
+        [RegularExpression("([1-9][0-9]*)", ErrorMessage = "El campo 'Codigo Postal' solo admite numeros del 0-9.")]
         public string? PostalCode { get; set; }
         [Display(Name = "Provincia")]
         [Required(ErrorMessage = "El campo 'Provincia' es requerido.")]

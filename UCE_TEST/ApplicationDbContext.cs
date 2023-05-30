@@ -41,7 +41,6 @@ namespace UCE_TEST
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-
                 entity.Property(e => e.PostalCode)
                     .HasMaxLength(6)
                     .IsUnicode(false);
@@ -73,6 +72,10 @@ namespace UCE_TEST
                 entity.Property(e => e.Email)
                     .HasMaxLength(25)
                     .IsUnicode(false);
+
+                entity.Property(e => e.IsActive)
+                    .IsRequired()
+                    .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.LastName)
                     .HasMaxLength(30)

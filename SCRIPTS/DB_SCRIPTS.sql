@@ -15,7 +15,7 @@ CREATE TABLE Employees(
     Email VARCHAR(25) NOT NULL,
     MaritalStatus VARCHAR(25) NOT NULL,
     IsActive BIT NOT NULL DEFAULT 1,
-    Photo IMAGE,
+    Photo IMAGE NOT NULL,
     CONSTRAINT PK_EMPLOYEES_ID PRIMARY KEY (ID),
     CONSTRAINT CK_EMPLOYEES_MARITALSTATUS CHECK (MaritalStatus IN('Soltero', 'Casado', 'Divorciado'))
 )
@@ -41,5 +41,5 @@ CREATE TABLE Logs(
     CONSTRAINT PK_LOGS_ID PRIMARY KEY (ID)
 )
 GO
-SELECT * FROM Employees;
-SELECT * FROM Addresses;
+SELECT * FROM Employees
+SELECT * FROM Addresses

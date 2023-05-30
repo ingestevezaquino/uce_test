@@ -50,6 +50,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.First().MaritalStatus)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().IsActive)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -82,7 +85,7 @@
                     @Html.DisplayFor(modelItem => birthday)
                 </td>
                 <td>
-                    @{ var dateOfHire = item.BirthDay.ToString("dd/MM/yyyy"); }
+                    @{ var dateOfHire = item.DateOfHire.ToString("dd/MM/yyyy"); }
                     @Html.DisplayFor(modelItem => dateOfHire)
                 </td>
                 <td>
@@ -98,9 +101,13 @@
                     @Html.DisplayFor(modelItem => item.MaritalStatus)
                 </td>
                 <td>
+                    @{ var state = item.IsActive is true ? "Activo" : "Desvinculado"; }
+                    @Html.DisplayFor(modelItem => state)
+                </td>
+                <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id">Desvincular</a>
                 </td>
             </tr>
         }

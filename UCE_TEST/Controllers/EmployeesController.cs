@@ -29,7 +29,7 @@ namespace UCE_TEST.Controllers
         // GET: Employees
         public async Task<IActionResult> Index(string currentFilter, string searchString, int? page)
         {
-            IEnumerable<Employee> employees = await _context.Employees.Include(e => e.Address).ToListAsync();
+            IEnumerable<Employee> employees = await _context.Employees.Where(e => e.IsActive.Equals(true)).Include(e => e.Address).ToListAsync();
 
             if (searchString != null)
             {
@@ -45,7 +45,7 @@ namespace UCE_TEST.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                employees = employees.Where(e => e.Name.ToUpper().Contains(searchString.ToUpper())
+                employees = employees.Where(e => e.IsActive.Equals(true)).Where(e => e.Name.ToUpper().Contains(searchString.ToUpper())
                                        || e.LastName.ToUpper().Contains(searchString.ToUpper())
                                        || e.DateOfHire.ToString("dd/MM/yyyy").Contains(searchString))
                                        .ToList();
@@ -54,7 +54,7 @@ namespace UCE_TEST.Controllers
             int pageSize = 3;
             int pageNumber = (page ?? 1);
 
-            return _context.Employees.Include(e => e.Address) != null ? 
+            return _context.Employees.Where(e => e.IsActive.Equals(true)).Include(e => e.Address) != null ? 
                           View(await employees.ToPagedListAsync(pageNumber, pageSize)) :
                           Problem("Entity set 'ApplicationDbContext.Employees' is null.");
         }
@@ -80,7 +80,7 @@ namespace UCE_TEST.Controllers
         // GET: Employees/Create
         public async Task<IActionResult> Create()
         {
-            ViewBag.Provinces = await UCE_TEST.Controllers.UtilitiesController.GetProvincesDO();
+            ViewBag.Provinces = await GetProvincesDO();
             ViewBag.MaritalStatus = new SelectList(Enum.GetValues<Models.Enums.MaritalState>());
             return View();
         }
@@ -92,19 +92,22 @@ namespace UCE_TEST.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,LastName,Position,BirthDay,DateOfHire,Phone,Email,MaritalStatus,Address")] Employee employee, IFormFile photo)
         {
+            if (photo is not null)
+            {
+                try
+                {
+                    using var memoryStream = new MemoryStream();
+                    photo.OpenReadStream().CopyTo(memoryStream);
+                    employee.Photo = memoryStream.ToArray();
+                }
+                catch
+                {
+                    return Problem("UNABLE TO PROCESS UPLOADED PHOTO");
+                }
+            }
+
             if (employee.Address is not null && ModelState["Address.Employee"].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
                 ModelState["Address.Employee"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
-
-            try
-            {
-                using var memoryStream = new MemoryStream();
-                photo.OpenReadStream().CopyTo(memoryStream);
-                employee.Photo = memoryStream.ToArray();
-            }
-            catch
-            {
-                return Problem("UNABLE TO PROCESS UPLOADED PHOTO");
-            }
 
             if (ModelState.IsValid)
             {
@@ -112,6 +115,9 @@ namespace UCE_TEST.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.Provinces = await GetProvincesDO();
+            ViewBag.MaritalStatus = new SelectList(Enum.GetValues<Models.Enums.MaritalState>());
             return View(employee);
         }
 
@@ -123,14 +129,18 @@ namespace UCE_TEST.Controllers
                 return NotFound();
             }
 
-            ViewBag.Provinces = await UCE_TEST.Controllers.UtilitiesController.GetProvincesDO();
-            ViewBag.MaritalStatus = new SelectList(Enum.GetValues<Models.Enums.MaritalState>());
+            var employee = await _context.Employees
+                .Where(e => e.IsActive.Equals(true))
+                .Include(e => e.Address)
+                .FirstOrDefaultAsync(e => e.Id.Equals(id));
 
-            var employee = await _context.Employees.Include(e => e.Address).FirstOrDefaultAsync(e => e.Id.Equals(id));
             if (employee == null)
             {
                 return NotFound();
             }
+
+            ViewBag.Provinces = await GetProvincesDO();
+            ViewBag.MaritalStatus = new SelectList(Enum.GetValues<Models.Enums.MaritalState>());
             return View(employee);
         }
 
@@ -146,15 +156,31 @@ namespace UCE_TEST.Controllers
                 return NotFound();
             }
 
-            try
+            var employeeFromDB = await _context.Employees.AsNoTracking()
+                        .Where(e => e.IsActive.Equals(true))
+                        .Include(e => e.Address)
+                        .FirstOrDefaultAsync(e => e.Id.Equals(employee.Id));
+
+            employee.IsActive = employeeFromDB.IsActive;
+            employee.Address.Id = employeeFromDB.Address.Id;
+
+            if (photo is null)
             {
-                using var memoryStream = new MemoryStream();
-                photo.OpenReadStream().CopyTo(memoryStream);
-                employee.Photo = memoryStream.ToArray();
+                employee.Photo = employeeFromDB.Photo;
+                ModelState["photo"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
             }
-            catch
+            else
             {
-                return Problem("UNABLE TO PROCESS UPLOADED PHOTO");
+                try
+                {
+                    using var memoryStream = new MemoryStream();
+                    photo.OpenReadStream().CopyTo(memoryStream);
+                    employee.Photo = memoryStream.ToArray();
+                }
+                catch
+                {
+                    return Problem("UNABLE TO PROCESS UPLOADED PHOTO");
+                }
             }
 
             if (employee.Address is not null && ModelState["Address.Employee"].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
@@ -164,8 +190,6 @@ namespace UCE_TEST.Controllers
             {
                 try
                 {
-                    employee.Address.Id = (await _context.Employees.AsNoTracking()
-                        .Include(e => e.Address).FirstOrDefaultAsync(e => e.Id.Equals(employee.Id))).Address.Id;
                     _context.Update(employee);
                     await _context.SaveChangesAsync();
                 }
@@ -182,6 +206,9 @@ namespace UCE_TEST.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.Provinces = await GetProvincesDO();
+            ViewBag.MaritalStatus = new SelectList(Enum.GetValues<Models.Enums.MaritalState>());
             return View(employee);
         }
 
@@ -194,7 +221,10 @@ namespace UCE_TEST.Controllers
             }
 
             var employee = await _context.Employees
+                .Where(m => m.IsActive.Equals(true))
+                .Include(m => m.Address)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (employee == null)
             {
                 return NotFound();
@@ -215,7 +245,8 @@ namespace UCE_TEST.Controllers
             var employee = await _context.Employees.FindAsync(id);
             if (employee != null)
             {
-                _context.Employees.Remove(employee);
+                employee.IsActive = false;
+                _context.Employees.Update(employee);
             }
             
             await _context.SaveChangesAsync();
@@ -225,6 +256,19 @@ namespace UCE_TEST.Controllers
         private bool EmployeeExists(int id)
         {
           return (_context.Employees?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        private async Task<SelectList> GetProvincesDO()
+        {
+            using HttpClient client = new();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+
+            var response = await client.GetStringAsync("http://provinciasrd.raydelto.org/provincias");
+            ProvinceResponse provinces = JsonConvert.DeserializeObject<ProvinceResponse>(response);
+
+            return new SelectList(provinces.Data.Select(x => x.Nombre));
         }
     }
 }

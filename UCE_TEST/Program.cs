@@ -9,7 +9,7 @@ builder.Services.AddControllersWithViews();
 var connectionStr = System.Environment.GetEnvironmentVariable("UCE_TEST_DB_CONNECTION") ?? "";
 
 if (String.IsNullOrEmpty(connectionStr))
-    throw new ApplicationException("UNABLE TO GET THE CONNECTION STRING, THEREFORE COULDN'T CONNECT TO DATABASE");
+    throw new ApplicationException("UNABLE TO GET THE CONNECTION STRING ENV VARIABLE, THEREFORE COULDN'T CONNECT TO DATABASE");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionStr));
