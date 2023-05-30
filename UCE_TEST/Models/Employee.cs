@@ -2,11 +2,17 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
+using UCE_TEST.Models;
 
 namespace UCE_TEST.Models
 {
     public partial class Employee
     {
+        public Employee()
+        {
+            Logs = new HashSet<Log>();
+        }
+
         public int Id { get; set; }
         [Display(Name = "Nombre")]
         [Required(ErrorMessage = "El campo 'Nombre' es requerido.")]
@@ -41,5 +47,6 @@ namespace UCE_TEST.Models
         public byte[]? Photo { get; set; }
 
         public virtual Address? Address { get; set; }
+        public virtual ICollection<Log> Logs { get; set; }
     }
 }

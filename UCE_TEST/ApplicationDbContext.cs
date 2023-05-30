@@ -101,6 +101,11 @@ namespace UCE_TEST
                 entity.Property(e => e.Description).IsUnicode(false);
 
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.Employee)
+                    .WithMany(p => p.Logs)
+                    .HasForeignKey(d => d.EmployeeId)
+                    .HasConstraintName("FK_LOGS_EMPLOYEEID");
             });
 
             OnModelCreatingPartial(modelBuilder);

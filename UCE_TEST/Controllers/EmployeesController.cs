@@ -108,7 +108,7 @@ namespace UCE_TEST.Controllers
 
             if (employee.Address is not null && ModelState["Address.Employee"].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
                 ModelState["Address.Employee"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
-
+            
             if (ModelState.IsValid)
             {
                 _context.Add(employee);
@@ -267,7 +267,8 @@ namespace UCE_TEST.Controllers
 
             var log = new Log()
             {
-                Description = $"La información de contacto del empleado con el Id: '{id}', " +
+                EmployeeId = id,
+                Description = $"La información de contacto del empleado " +
                 $"fue modificada de la siguiente manera: ",
                 UpdatedAt = DateTime.Now
             };
