@@ -253,6 +253,27 @@ namespace UCE_TEST.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        [Route("api/[controller]/modifyContactMethods")]
+        public async Task<IActionResult> ModifyContactMethods(int id, string phone, string email)
+        {
+            if (id == 0)
+                return BadRequest("The 'id' Query Param must be provided");
+
+            var employee = await _context.Employees.Where(m => m.Id.Equals(id)).FirstOrDefaultAsync();
+
+            if (employee is null)
+                return NotFound($"There is not an employee that holds the id: {id}");
+
+            employee.Phone = !String.IsNullOrEmpty(phone) ? phone : employee.Phone;
+            employee.Email = !String.IsNullOrEmpty(email) ? email : employee.Email;
+
+            _context.Employees.Update(employee);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         private bool EmployeeExists(int id)
         {
           return (_context.Employees?.Any(e => e.Id == id)).GetValueOrDefault();

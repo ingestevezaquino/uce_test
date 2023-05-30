@@ -15,7 +15,7 @@
 @using (Html.BeginForm("Index", "Employees", FormMethod.Get))
 {
     <p>
-        Filtro General: @Html.TextBox("SearchString")
+        Filtro General (Nombre | Apellido | Fecha de Contratación): @Html.TextBox("SearchString")
         <input type="submit" class="btn btn-success mb-1" value="Buscar" />
     </p>
 }
@@ -25,6 +25,9 @@
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.First().Photo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Id)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.First().Name)
@@ -70,6 +73,9 @@
                         }
                     }
                     <img src="@employeePhoto" class="img-fluid">
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)

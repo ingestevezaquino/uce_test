@@ -30,7 +30,7 @@ namespace UCE_TEST.Models
         public string Phone { get; set; } = null!;
         [Display(Name = "Correo")]
         [Required(ErrorMessage = "El campo 'Correo' es requerido.")]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "El campo 'Correo' no contiene una dirección de e-mail válida.")]
         public string Email { get; set; } = null!;
         [Display(Name = "Estado Civil")]
         [Required(ErrorMessage = "El campo 'Estado Civil' es requerido.")]
