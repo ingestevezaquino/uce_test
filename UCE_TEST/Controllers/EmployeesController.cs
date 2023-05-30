@@ -12,6 +12,8 @@ using UCE_TEST;
 using UCE_TEST.Models.DTOs;
 using UCE_TEST.Models;
 using Newtonsoft.Json;
+using X.PagedList;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UCE_TEST.Controllers
 {
@@ -25,10 +27,35 @@ namespace UCE_TEST.Controllers
         }
 
         // GET: Employees
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string currentFilter, string searchString, int? page)
         {
-              return _context.Employees.Include(e => e.Address) != null ? 
-                          View(await _context.Employees.Include(e => e.Address).ToListAsync()) :
+            IEnumerable<Employee> employees = await _context.Employees.Include(e => e.Address).ToListAsync();
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchString;
+
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                employees = employees.Where(e => e.Name.ToUpper().Contains(searchString.ToUpper())
+                                       || e.LastName.ToUpper().Contains(searchString.ToUpper())
+                                       || e.DateOfHire.ToString("dd/MM/yyyy").Contains(searchString))
+                                       .ToList();
+            }
+
+            int pageSize = 3;
+            int pageNumber = (page ?? 1);
+
+            return _context.Employees.Include(e => e.Address) != null ? 
+                          View(await employees.ToPagedListAsync(pageNumber, pageSize)) :
                           Problem("Entity set 'ApplicationDbContext.Employees' is null.");
         }
 
@@ -40,7 +67,7 @@ namespace UCE_TEST.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees
+            var employee = await _context.Employees.Include(m => m.Address)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (employee == null)
             {
@@ -53,15 +80,7 @@ namespace UCE_TEST.Controllers
         // GET: Employees/Create
         public async Task<IActionResult> Create()
         {
-            using HttpClient client = new();
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-
-            var response = await client.GetStringAsync("http://provinciasrd.raydelto.org/provincias");
-            ProvinceResponse provinces = JsonConvert.DeserializeObject<ProvinceResponse>(response);
-
-            ViewBag.Provinces = new SelectList(provinces.Data.Select(x => x.Nombre));
+            ViewBag.Provinces = await UCE_TEST.Controllers.UtilitiesController.GetProvincesDO();
             ViewBag.MaritalStatus = new SelectList(Enum.GetValues<Models.Enums.MaritalState>());
             return View();
         }
@@ -104,7 +123,10 @@ namespace UCE_TEST.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FindAsync(id);
+            ViewBag.Provinces = await UCE_TEST.Controllers.UtilitiesController.GetProvincesDO();
+            ViewBag.MaritalStatus = new SelectList(Enum.GetValues<Models.Enums.MaritalState>());
+
+            var employee = await _context.Employees.Include(e => e.Address).FirstOrDefaultAsync(e => e.Id.Equals(id));
             if (employee == null)
             {
                 return NotFound();
@@ -117,17 +139,33 @@ namespace UCE_TEST.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,LastName,Position,BirthDay,DateOfHire,Phone,Email,MaritalStatus,Photo")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,LastName,Position,BirthDay,DateOfHire,Phone,Email,MaritalStatus,Address")] Employee employee, IFormFile photo)
         {
             if (id != employee.Id)
             {
                 return NotFound();
             }
 
+            try
+            {
+                using var memoryStream = new MemoryStream();
+                photo.OpenReadStream().CopyTo(memoryStream);
+                employee.Photo = memoryStream.ToArray();
+            }
+            catch
+            {
+                return Problem("UNABLE TO PROCESS UPLOADED PHOTO");
+            }
+
+            if (employee.Address is not null && ModelState["Address.Employee"].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
+                ModelState["Address.Employee"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    employee.Address.Id = (await _context.Employees.AsNoTracking()
+                        .Include(e => e.Address).FirstOrDefaultAsync(e => e.Id.Equals(employee.Id))).Address.Id;
                     _context.Update(employee);
                     await _context.SaveChangesAsync();
                 }

@@ -14,6 +14,7 @@ CREATE TABLE Employees(
     Phone VARCHAR(10) NOT NULL,
     Email VARCHAR(25) NOT NULL,
     MaritalStatus VARCHAR(25) NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
     Photo IMAGE,
     CONSTRAINT PK_EMPLOYEES_ID PRIMARY KEY (ID),
     CONSTRAINT CK_EMPLOYEES_MARITALSTATUS CHECK (MaritalStatus IN('Soltero', 'Casado', 'Divorciado'))

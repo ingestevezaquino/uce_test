@@ -4,69 +4,107 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Detalles</h1>
 
 <div>
-    <h4>Employee</h4>
+    <h4>Empleado</h4>
     <hr />
+    @{
+        string employeePhoto = null;
+        if (Model.Photo is not null)
+        {
+            string imgBase64Data = Convert.ToBase64String(Model.Photo);
+            employeePhoto = string.Format("data:image/png;base64,{0}", imgBase64Data);
+        }
+    }
+    <img src="@employeePhoto" class="img-fluid w-25 mb-2">
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Name)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Name)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.LastName)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.LastName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Position)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Position)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.BirthDay)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BirthDay)
+        <dd class="col-sm-10">
+            @{ var birthday = Model.BirthDay.ToString("dd/MM/yyyy"); }
+            @Html.DisplayFor(model => birthday)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DateOfHire)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateOfHire)
+        <dd class="col-sm-10">
+            @{ var dateOfHire = Model.DateOfHire.ToString("dd/MM/yyyy"); }
+            @Html.DisplayFor(model => dateOfHire)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Phone)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Phone)
+        <dd class="col-sm-10">
+            @{
+                var employeePhone = $"{Model.Phone[0..3]}-{Model.Phone[3..6]}-{Model.Phone[6..]}";
+            }
+            @Html.DisplayFor(model => employeePhone)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Email)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Email)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.MaritalStatus)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.MaritalStatus)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Photo)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Address.Street)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Photo)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Address.Street)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Address.Zone)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Address.Zone)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Address.PostalCode)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Address.PostalCode)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Address.Province)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Address.Province)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Address.Country)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Address.Country)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Editar</a> |
+    <a asp-action="Index">Volver a la Lista</a>
 </div>
